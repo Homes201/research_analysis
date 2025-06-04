@@ -72,7 +72,7 @@ sidebar_sections = [
     ("웹툰 이용 스타일", list(range(12, 19))),
     ("19+콘텐츠 인식", list(range(19, 24))),
     # ("네이버 웹툰 앞으로", list(range(1, 25)) + [25, 251, 26, 261] + list(range(27, 32))), #자연어 배포 안되는 이슈로 주석 처리
-    ("네이버 웹툰 앞으로", list(range(1, 32))),
+    ("네이버 웹툰 앞으로", list(range(24, 32))),
 ]
 
 with st.sidebar:
@@ -623,12 +623,20 @@ for q_num in list(range(1, 12)) + [111] + list(range(12, 32)):
         counts = df[col].value_counts().reindex(order, fill_value=0)
         percents = (counts / counts.sum() * 100).round(1)
         bar_text = [f"{v} ({p}%)" for v, p in zip(counts.values, percents)]
+
+        # 명시적으로 제시 
+        bar_df = pd.DataFrame({
+        '의견': labels,
+        '응답 수': counts.values,
+        'text': bar_text
+        })
         fig = px.bar(
-            x=labels,
-            y=counts.values,
-            text=bar_text,
-            labels={'x': '의견', 'y': '응답 수'}
+            bar_df,
+            x='의견',
+            y='응답 수',
+            text='text'
         )
+
         fig.update_traces(textposition='outside', marker_color='seagreen')
         st.plotly_chart(fig, use_container_width=True)
 
@@ -647,11 +655,19 @@ for q_num in list(range(1, 12)) + [111] + list(range(12, 32)):
         counts = df[col].value_counts().reindex(order, fill_value=0)
         percents = (counts / counts.sum() * 100).round(1)
         bar_text = [f"{v} ({p}%)" for v, p in zip(counts.values, percents)]
+
+        # 명시적으로 제시
+        bar_df = pd.DataFrame({
+        '영향': labels,
+        '응답 수': counts.values,
+        'text': bar_text
+         })
+        
         fig = px.bar(
-            x=labels,
-            y=counts.values,
-            text=bar_text,
-            labels={'x': '영향', 'y': '응답 수'}
+            bar_df,
+            x='영향',
+            y='응답 수',
+            text='text'
         )
         fig.update_traces(textposition='outside', marker_color='darkorange')
         st.plotly_chart(fig, use_container_width=True)
