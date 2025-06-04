@@ -3,12 +3,15 @@ import plotly.express as px
 import pandas as pd
 import re
 from utils import load_and_preprocess
+from konlpy.tag import Okt
+import plotly.express as px
+
 
 st.set_page_config(page_title="네이버 웹툰 브랜드 인식 분석", layout="wide")
 
 @st.cache_data
 def get_data():
-    file_name = r'C:\Users\HSJ\Documents\git\research_analysis\19+ 웹툰 서비스에 대한 브랜드 인식 변화 조사 설문(응답)_변경.xlsx'
+    file_name = r'.\19+ 웹툰 서비스에 대한 브랜드 인식 변화 조사 설문(응답)_변경.xlsx'
     return load_and_preprocess(file_name)
 
 df = get_data()
@@ -17,45 +20,64 @@ st.title("네이버 웹툰 브랜드 인식 변화 설문 분석")
 st.markdown("#### 문항을 선택하면 해당 위치로 이동합니다.")
 
 question_titles = {
-    1: '연령대가 어떻게 되시나요?',
-    2: '성별을 알려주실 수 있나요?',
-    3: '현재 어떤 일을 하고 계신가요?',
-    4: '결혼 여부는 어떻게 되시나요?',
-    5: '현재 미성년 자녀가 있으신가요?',
-    6: "'네이버' 하면 가장 먼저 떠오르는 이미지는 어떤 것들이 있나요? (최대 3개까지 선택)",
-    7: '전반적으로 네이버 서비스에 얼마나 만족하고 계신가요?',
-    8: '평소 자주 사용하는 네이버 서비스는 무엇인가요? (최대 3개까지 선택)',
-    9: '최근 1년 안에 웹툰을 본 적이 있으신가요?',
-    10: '사용 중인 웹툰 플랫폼이 있다면 모두 선택해주실 수 있나요?',
-    11: '네이버 웹툰을 사용하지 않으셨다면, 어떤 이유가 있으신가요?',
-    12: '네이버 웹툰을 얼마나 오랫동안 사용해오셨나요?',
-    13: '네이버 웹툰 하면 떠오르는 이미지를 3개 이내로 골라주실 수 있을까요?',
-    14: '네이버 웹툰 서비스를 얼마나 자주 사용하고 계신가요?',
-    15: '네이버 웹툰에서 가장 선호하는 웹툰 장르는 어떤 것 인가요?',
-    16: '네이버 웹툰 콘텐츠 이용을 위해 유료 결제(예: 쿠키 충전, 유료 회차 구매 등)를 한 경험이 있으십니까?',
-    17: '(결제 경험이 있으시다면) 지난 1년 동안 월평균 결제 금액은 어느 정도 되시나요?',
-    18: '웹툰을 보는 주된 이유는 무엇인가요? (3개 이내로 골라주세요)',
-    19: '성인 연령 확인 후 열람 가능한 콘텐츠가 있다는 것을 알고 계셨나요?',
-    20: '일반적으로 웹툰 플랫폼이 성인 연령 제한 작품을 제공하는 것에 대해 어떻게 생각하시나요?',
-    21: '네이버 웹툰에서 성인 연령 제한 작품을 이용해본 경험이 있으신가요?',
-    22: '성인 연령 제한 작품을 이용하신 주된 이유는 무엇인가요?',
-    23: '이용하지 않으셨다면, 주된 이유는 무엇인가요?',
-    24: '네이버 웹툰이 성인 연령 제한 작품을 포함하여 다양한 연령층을 고려한 콘텐츠를 제공하는 것에 대해 어떻게 생각하시나요?',
-    25: '네이버 웹툰이 성인 독자층까지 고려한 다양한 작품을 제공하는 것이 네이버 웹툰 브랜드 이미지에 부정적인 영향을 끼쳤다고 생각하시나요?',
-    26: "이러한 콘텐츠 구성(예: 다양한 연령층 대상 작품 제공 등)이 '네이버'라는 기업 전체의 브랜드 이미지에 부정적 영향을 준다고 생각하시나요?",
-    27: '타 웹툰 플랫폼과 비교했을 때, 네이버 웹툰의 성인 연령 제한 작품 수위는 어떤 편이라고 생각하시나요?',
-    28: '네이버 웹툰에서 성인 연령 확인 후 이용 가능한 작품들을 접하시면서 불편하거나 개선되었으면 하는 점이 있었나요?',
-    29: '(주관식) 구체적으로 어떤 점이 불편했는지 알려주실 수 있나요?',
-    30: '현재 네이버 웹툰에서 다양한 연령대의 작품들을 구분하고, 성인 확인이 필요한 작품들에 대한 접근을 관리하는 기능에 대해 얼마나 만족하시나요?'
+    1: "1. 연령대가 어떻게 되시나요?",
+    2: "2. 성별을 알려주실 수 있나요?",
+    3: "3. 현재 어떤 일을 하고 계신가요?",
+    4: "4. 결혼 여부는 어떻게 되시나요?",
+    5: "5. 현재 미성년 자녀가 있으신가요?",
+    6: "6. '네이버' 하면 가장 먼저 떠오르는 이미지는 어떤 것들이 있나요? (최대 3개까지 선택)",
+    7: "7. 전반적으로 네이버 서비스에 얼마나 만족하고 계신가요?",
+    8: "8. 평소 자주 사용하는 네이버 서비스는 무엇인가요? (최대 3개까지 선택)",
+    9: "9. 최근 1년 안에 웹툰을 본 적이 있으신가요?",
+    10: "10. 사용 중인 웹툰 플랫폼이 있다면 모두 선택해주실 수 있나요?",
+    11: "11. 네이버 웹툰을 사용하지 않으셨다면, 어떤 이유가 있으신가요?",
+    111: "11-1. 추후에 네이버 웹툰을 이용해볼 생각이 있으신가요?",
+    12: "12. 네이버 웹툰을 얼마나 오랫동안 사용해오셨나요?",
+    13: "13. 네이버 웹툰 하면 떠오르는 이미지를 3개 이내로 골라주실 수 있을까요? (최대 3개까지 선택)",
+    14: "14. 네이버 웹툰 서비스를 얼마나 자주 사용하고 계신가요?",
+    15: "15. 네이버 웹툰에서 가장 선호하는 웹툰 장르는 어떤 것 인가요?",
+    16: "16. 네이버 웹툰 콘텐츠 이용을 위해 유료 결제(예: 쿠키 충전, 유료 회차 구매 등)를 한 경험이 있으십니까?",
+    17: "17. (결제 경험이 있으시다면) 지난 1년 동안 월평균 결제 금액은 어느 정도 되시나요?",
+    18: "18. 웹툰을 보는 주된 이유는 무엇인가요? (3개 이내로 골라주세요)",
+    19: "19. 성인 연령 확인 후 열람 가능한 콘텐츠가 있다는 것을 알고 계셨나요?",
+    20: "20. 일반적으로 웹툰 플랫폼이 성인 연령 제한 작품을 제공하는 것에 대해 어떻게 생각하시나요?",
+    21: "21. 네이버 웹툰에서 성인 연령 제한 작품을 이용해본 경험이 있으신가요?",
+    22: "22. 성인 연령 제한 작품을 이용하신 주된 이유는 무엇인가요?",
+    23: "23. 이용하지 않으셨다면, 주된 이유는 무엇인가요?",
+    24: "24. 네이버 웹툰이 성인 연령 제한 작품을 포함하여 다양한 연령층을 고려한 콘텐츠를 제공하는 것에 대해 어떻게 생각하시나요?",
+    25: "25. 네이버 웹툰이 성인 독자층까지 고려한 다양한 작품을 제공하는 것이 네이버 웹툰 브랜드 이미지에 부정적인 영향을 끼쳤다고 생각하시나요?",
+    251: "25-1. (주관식) 왜 그렇게 느끼셨는지 자유롭게 작성해주실 수 있을까요?",
+    26: "26. 이러한 콘텐츠 구성(예: 다양한 연령층 대상 작품 제공 등)이 '네이버'라는 기업 전체의 브랜드 이미지에 부정적 영향을 준다고 생각하시나요?",
+    261: "26-1. (주관식) 가장 큰 영향을 주었다고 느끼신 측면이나 요인",
+    27: "27. 타 웹툰 플랫폼과 비교했을 때, 네이버 웹툰의 성인 연령 제한 작품 수위는 어떤 편이라고 생각하시나요?",
+    28: "28. 네이버 웹툰에서 성인 연령 확인 후 이용 가능한 작품들을 접하시면서 불편하거나 개선되었으면 하는 점이 있었나요?",
+    29: "29. (주관식) 구체적으로 어떤 점이 불편했는지 알려주실 수 있나요?",
+    30: "30. 현재 네이버 웹툰에서 다양한 연령대의 작품들을 구분하고, 성인 확인이 필요한 작품들에 대한 접근을 관리하는 기능에 대해 얼마나 만족하시나요?",
+    31: "31. 네이버 웹툰에서 성인 독자를 위한 작품들을 더 쉽게 발견하거나 관련 추천이 늘어난다면 (성인 연령 제한 작품이 더 눈에 띄게 노출된다면), 해당 작품들을 이전보다 더 자주 보게 될 것 같으신가요?"
+
 }
 
-# 사이드바에서 문항 선택
-menu = [question_titles[i] for i in range(1, 31)]
-selected = st.sidebar.selectbox("문항 바로가기", menu, key="sidebar_select")
+# 사이드바 그룹별 구성
+sidebar_sections = [
+    ("응답자 정보 조사", list(range(1, 6))),
+    ("네이버에 대한 인식", list(range(6, 9))),
+    ("웹툰 사용 경험", list(range(9, 12))+ [111]),
+    ("웹툰 이용 스타일", list(range(12, 19))),
+    ("19+콘텐츠 인식", list(range(19, 24))),
+    ("네이버 웹툰 앞으로", list(range(1, 25)) + [25, 251, 26, 261] + list(range(27, 32))),
+]
 
-# 쿼리 파라미터로 선택된 문항 번호를 저장 (st.query_params만 사용)
-selected_q = [k for k, v in question_titles.items() if v == selected][0]
-st.query_params["q"] = str(selected_q)
+with st.sidebar:
+    st.markdown("## 문항 바로가기")
+    sidebar_options = []
+    sidebar_labels = []
+    for section, qnums in sidebar_sections:
+        st.markdown(f"**{section}**")
+        for q in qnums:
+            label = question_titles[q]
+            sidebar_options.append(q)
+            sidebar_labels.append(f"{label}")
+            st.markdown(f"- [{label}](#{'q'+str(q)})")
 
 # 스크롤 이동용 앵커 생성 함수
 def anchor(num):
@@ -77,9 +99,10 @@ if "q" in query_params:
     )
 
 # 모든 문항 결과를 한 페이지에 순서대로 출력
-for q_num in range(1, 31):
+
+for q_num in list(range(1, 12)) + [111] + list(range(12, 25)) + [25, 251, 26, 261] + list(range(27, 32)):
     anchor(q_num)
-    st.subheader(f"{q_num}. {question_titles[q_num]}")
+    st.subheader(question_titles[q_num])
     # 아래에 기존 각 문항별 시각화 코드를 if q_num == ...: 대신 for문 안에 넣으세요.
 
     # 1. 연령대 분포
@@ -87,28 +110,28 @@ for q_num in range(1, 31):
         age_order = ['10대', '20대', '30대', '40대', '50대 이상']
         age_df = df['age_group'].value_counts().reindex(age_order).reset_index()
         age_df.columns = ['age_group', 'count']
-        fig = px.pie(age_df, names='age_group', values='count', title=question_titles[1])
+        fig = px.pie(age_df, names='age_group', values='count')
         st.plotly_chart(fig, use_container_width=True)
 
     # 2. 성별 분포
     elif q_num == 2:
         gender_df = df['gender'].value_counts().reset_index()
         gender_df.columns = ['gender', 'count']
-        fig = px.pie(gender_df, names='gender', values='count', title=question_titles[2])
+        fig = px.pie(gender_df, names='gender', values='count')
         st.plotly_chart(fig, use_container_width=True)
 
     # 3. 직업 분포
     elif q_num == 3:
         occupation_df = df['occupation'].value_counts().reset_index()
         occupation_df.columns = ['occupation', 'count']
-        fig = px.pie(occupation_df, names='occupation', values='count', title=question_titles[3])
+        fig = px.pie(occupation_df, names='occupation', values='count')
         st.plotly_chart(fig, use_container_width=True)
 
     # 4. 결혼 여부
     elif q_num == 4:
         marital_df = df['marital_status'].value_counts().reset_index()
         marital_df.columns = ['marital_status', 'count']
-        fig = px.pie(marital_df, names='marital_status', values='count', title=question_titles[4])
+        fig = px.pie(marital_df, names='marital_status', values='count')
         st.plotly_chart(fig, use_container_width=True)
 
     # 5. 미성년 자녀 유무
@@ -116,7 +139,7 @@ for q_num in range(1, 31):
         child_df = df['has_minor_children'].value_counts().reset_index()
         child_df.columns = ['has_minor_children', 'count']
         child_df['has_minor_children'] = child_df['has_minor_children'].map({1: '예', 0: '아니오'})
-        fig = px.pie(child_df, names='has_minor_children', values='count', title=question_titles[5])
+        fig = px.pie(child_df, names='has_minor_children', values='count')
         st.plotly_chart(fig, use_container_width=True)
 
     # 6. 네이버 하면 떠오르는 이미지 (복수응답, 막대그래프)
@@ -157,8 +180,8 @@ for q_num in range(1, 31):
             y=image_counts.index,
             orientation='h',
             text=bar_text,
-            labels={'x': '응답 수', 'y': '이미지'},
-            title=question_titles[6]
+            labels={'x': '응답 수', 'y': '이미지'}
+        
         )
         fig.update_traces(textposition='outside', marker_color='mediumseagreen')
         st.plotly_chart(fig, use_container_width=True)
@@ -173,8 +196,7 @@ for q_num in range(1, 31):
             x=sat_counts.index.astype(str),
             y=sat_counts.values,
             text=bar_text,
-            labels={'x': '만족도(점수)', 'y': '응답 수'},
-            title=question_titles[7]
+            labels={'x': '만족도(점수)', 'y': '응답 수'}
         )
         fig.update_traces(textposition='outside', marker_color='royalblue')
         st.plotly_chart(fig, use_container_width=True)
@@ -197,8 +219,7 @@ for q_num in range(1, 31):
             y=service_counts.index,
             orientation='h',
             text=bar_text,
-            labels={'x': '응답 수', 'y': '서비스'},
-            title=question_titles[8]
+            labels={'x': '응답 수', 'y': '서비스'}
         )
         fig.update_traces(textposition='outside', marker_color='darkcyan')
         st.plotly_chart(fig, use_container_width=True)
@@ -211,8 +232,7 @@ for q_num in range(1, 31):
         fig = px.pie(
             usage_df,
             names='webtoon_usage_last_year',
-            values='count',
-            title=question_titles[9]
+            values='count'
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -237,8 +257,7 @@ for q_num in range(1, 31):
             y=platform_counts.index,
             orientation='h',
             text=bar_text,
-            labels={'x': '응답 수', 'y': '플랫폼'},
-            title=question_titles[10]
+            labels={'x': '응답 수', 'y': '플랫폼'}
         )
         fig.update_traces(textposition='outside', marker_color='indigo')
         st.plotly_chart(fig, use_container_width=True)
@@ -266,13 +285,28 @@ for q_num in range(1, 31):
                 y=reason_labels,
                 orientation='h',
                 text=bar_text,
-                labels={'x': '응답 수', 'y': '미이용 사유'},
-                title=question_titles[11]
+                labels={'x': '응답 수', 'y': '미이용 사유'}
             )
             fig.update_traces(textposition='outside', marker_color='tomato')
             st.plotly_chart(fig, use_container_width=True)
         else:
             st.warning("미이용 사유 인코딩 컬럼이 없습니다.")
+
+    # 11-1. 추후에 네이버 웹툰을 이용해볼 생각이 있으신가요? (파이차트)
+    elif q_num == 111:
+        col = 'intent_to_use_naver_webtoon' 
+        if col in df.columns:
+            intention_df = df[col].map({1: '예', 0: '아니오'}).value_counts().reset_index()
+            intention_df.columns = ['intent_to_use_naver_webtoon', 'count']
+            fig = px.pie(
+                intention_df,
+                names='intent_to_use_naver_webtoon',
+                values='count'
+            )
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("intent_to_use_naver_webtoon 컬럼이 없습니다.")
+
 
     # 12. 네이버 웹툰 사용 기간 (막대그래프)
     elif q_num == 12:
@@ -299,8 +333,7 @@ for q_num in range(1, 31):
             x='duration',
             y='count',
             text='bar_text',
-            labels={'duration': '이용 기간', 'count': '응답 수'},
-            title=question_titles[12]
+            labels={'duration': '이용 기간', 'count': '응답 수'}
         )
         fig.update_traces(textposition='outside', marker_color='goldenrod')
         st.plotly_chart(fig, use_container_width=True)
@@ -344,8 +377,7 @@ for q_num in range(1, 31):
             y=image_counts.index,
             orientation='h',
             text=bar_text,
-            labels={'x': '응답 수', 'y': '이미지'},
-            title=question_titles[13]
+            labels={'x': '응답 수', 'y': '이미지'}
         )
         fig.update_traces(textposition='outside', marker_color='forestgreen')
         st.plotly_chart(fig, use_container_width=True)
@@ -376,8 +408,7 @@ for q_num in range(1, 31):
             x='frequency',
             y='count',
             text='bar_text',
-            labels={'frequency': '이용 빈도', 'count': '응답 수'},
-            title=question_titles[14]
+            labels={'frequency': '이용 빈도', 'count': '응답 수'}
         )
         fig.update_traces(textposition='outside', marker_color='dodgerblue')
         st.plotly_chart(fig, use_container_width=True)
@@ -406,8 +437,7 @@ for q_num in range(1, 31):
                 y=genre_labels,
                 orientation='h',
                 text=bar_text,
-                labels={'x': '응답 수', 'y': '장르'},
-                title=question_titles[15]
+                labels={'x': '응답 수', 'y': '장르'}
             )
             fig.update_traces(textposition='outside', marker_color='mediumpurple')
             st.plotly_chart(fig, use_container_width=True)
@@ -422,8 +452,7 @@ for q_num in range(1, 31):
         fig = px.pie(
             paid_df,
             names='has_paid_for_webtoon',
-            values='count',
-            title=question_titles[16]
+            values='count'
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -456,8 +485,7 @@ for q_num in range(1, 31):
             x='payment',
             y='count',
             text='bar_text',
-            labels={'payment': '월평균 결제 금액', 'count': '응답 수'},
-            title=question_titles[17]
+            labels={'payment': '월평균 결제 금액', 'count': '응답 수'}
         )
         fig.update_traces(textposition='outside', marker_color='orange')
         st.plotly_chart(fig, use_container_width=True)
@@ -480,8 +508,7 @@ for q_num in range(1, 31):
             y=reason_counts.index,
             orientation='h',
             text=bar_text,
-            labels={'x': '응답 수', 'y': '이유'},
-            title=question_titles[18]
+            labels={'x': '응답 수', 'y': '이유'}
         )
         fig.update_traces(textposition='outside', marker_color='teal')
         st.plotly_chart(fig, use_container_width=True)
@@ -494,8 +521,7 @@ for q_num in range(1, 31):
         fig = px.pie(
             aware_df,
             names='aware_of_age_restricted_content',
-            values='count',
-            title=question_titles[19]
+            values='count'
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -518,8 +544,7 @@ for q_num in range(1, 31):
             x=labels,
             y=counts.values,
             text=bar_text,
-            labels={'x': '의견', 'y': '응답 수'},
-            title=question_titles[20]
+            labels={'x': '의견', 'y': '응답 수'}
         )
         fig.update_traces(textposition='outside', marker_color='salmon')
         st.plotly_chart(fig, use_container_width=True)
@@ -532,8 +557,7 @@ for q_num in range(1, 31):
         fig = px.pie(
             used_df,
             names='used_age_restricted_content',
-            values='count',
-            title=question_titles[21]
+            values='count'
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -551,8 +575,7 @@ for q_num in range(1, 31):
             x=reason_counts.values,
             y=reason_counts.index,
             orientation='h',
-            labels={'x': '응답 수', 'y': '이용 이유'},
-            title=question_titles[22] + " (상위 10개, 순서 반대)"
+            labels={'x': '응답 수', 'y': '이용 이유'}
         )
         fig.update_traces(text=reason_counts.values, textposition='outside', marker_color='crimson')
         st.plotly_chart(fig, use_container_width=True)
@@ -571,8 +594,7 @@ for q_num in range(1, 31):
             x=reason_counts.values,
             y=reason_counts.index,
             orientation='h',
-            labels={'x': '응답 수', 'y': '미이용 이유'},
-            title=question_titles[23] + " (상위 10개, 순서 반대)"
+            labels={'x': '응답 수', 'y': '미이용 이유'}
         )
         fig.update_traces(text=reason_counts.values, textposition='outside', marker_color='slateblue')
         st.plotly_chart(fig, use_container_width=True)
@@ -596,8 +618,7 @@ for q_num in range(1, 31):
             x=labels,
             y=counts.values,
             text=bar_text,
-            labels={'x': '의견', 'y': '응답 수'},
-            title=question_titles[24]
+            labels={'x': '의견', 'y': '응답 수'}
         )
         fig.update_traces(textposition='outside', marker_color='seagreen')
         st.plotly_chart(fig, use_container_width=True)
@@ -621,12 +642,61 @@ for q_num in range(1, 31):
             x=labels,
             y=counts.values,
             text=bar_text,
-            labels={'x': '영향', 'y': '응답 수'},
-            title=question_titles[25]
+            labels={'x': '영향', 'y': '응답 수'}
         )
         fig.update_traces(textposition='outside', marker_color='darkorange')
         st.plotly_chart(fig, use_container_width=True)
 
+    # 25-1. (주관식) 왜 그렇게 느끼셨는지 자유롭게 작성해주실 수 있을까요? (감정 유형별 단어 빈도)
+    elif q_num == 251:
+        col = 'reason_for_brand_image_opinion'
+        stopwords = {'오히려', '것', '더', '웹툰', '작품이', '네이버', "때문", '영화화', '영화계', '만화가', '만화', '문화생활', '영화', '이', '에','생각','.','을','적','의',',','와'}
+        emotion_words = {
+            '긍정': ['좋다', '행복', '괜찮', '완벽', '긍정', '필요', '재밌', '즐기', '공감', '존중', '개방', '만족', '고급', '완성도', '쾌적', '흥미', '집중', '변화', '트랜드', '다양성', '맞춤형', '필요하다'],
+            '부정': ['아쉽', '문제', '별로', '타격', '부정', '싫', '불편', '과하다', '덜하다', 'B급', '노출', '선정적', '지나치', '독', '불만', '불쾌', '아니다', '없다'],
+            '중립': ['없다', '모르', '모름', '없음', '별다르', '없을', '없다고', '없음']
+        }
+        emotion_type_map = {}
+        for t, words in emotion_words.items():
+            for w in words:
+                emotion_type_map[w] = t
+        if col in df.columns:
+            text = ' '.join(df[col].dropna().astype(str))
+            if text.strip():
+                okt = Okt()
+                words = [word for word in okt.morphs(text) if word not in stopwords]
+                emotion_filtered = [w for w in words if w in emotion_type_map]
+                freq = pd.Series(emotion_filtered).value_counts()
+                table = []
+                for word, count in freq.items():
+                    table.append([emotion_type_map[word], word, count])
+                df_table = pd.DataFrame(table, columns=['유형', '감정단어', '빈도'])
+                df_table = df_table.sort_values(['유형', '빈도'], ascending=[True, False])
+                st.dataframe(df_table)
+                category_sum = df_table.groupby('유형')['빈도'].sum().reindex(['긍정', '부정', '중립'])
+                fig = px.bar(
+                    x=category_sum.index,
+                    y=category_sum.values,
+                    labels={'x': '감정 유형', 'y': '단어 빈도 합계'},
+                    text=category_sum.values,
+                    color=category_sum.index,
+                    color_discrete_map={'긍정': 'royalblue', '부정': 'tomato', '중립': 'gray'},
+                    title='감정 유형별 단어 빈도'
+                )
+                fig.update_traces(textposition='outside')
+                fig.update_layout(
+                    xaxis=dict(tickfont=dict(size=13)),
+                    yaxis=dict(tickfont=dict(size=13)),
+                    title_font_size=20,
+                    showlegend=False
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("주관식 응답이 없습니다.")
+        else:
+            st.warning("reason_for_brand_image_opinion 컬럼이 없습니다.")
+
+   
     # 26. 기업 브랜드 이미지 영향 (막대그래프)
     elif q_num == 26:
         col = 'impact_on_company_brand_image'
@@ -646,12 +716,59 @@ for q_num in range(1, 31):
             x=labels,
             y=counts.values,
             text=bar_text,
-            labels={'x': '영향', 'y': '응답 수'},
-            title=question_titles[26]
+            labels={'x': '영향', 'y': '응답 수'}
         )
         fig.update_traces(textposition='outside', marker_color='darkgreen')
         st.plotly_chart(fig, use_container_width=True)
 
+ # 26-1. (주관식) 가장 큰 영향을 주었다고 느끼신 측면이나 요인 (감정 유형별 단어 빈도)
+    elif q_num == 261:
+        col = 'reason_for_company_brand_image_opinion'
+        stopwords = {'오히려', '것', '더', '웹툰', '작품이', '네이버', "때문", '영화화', '영화계', '만화가', '만화', '문화생활', '영화', '이', '에','생각','.','을','적','의',',','와'}
+        emotion_words = {
+            '긍정': ['좋다', '행복', '괜찮', '완벽', '긍정', '필요', '재밌', '즐기', '공감', '존중', '개방', '만족', '고급', '완성도', '쾌적', '흥미', '집중', '변화', '트랜드', '다양성', '맞춤형', '필요하다'],
+            '부정': ['아쉽', '문제', '별로', '타격', '부정', '싫', '불편', '과하다', '덜하다', 'B급', '노출', '선정적', '지나치', '독', '불만', '불쾌', '아니다', '없다'],
+            '중립': ['없다', '모르', '모름', '없음', '별다르', '없을', '없다고', '없음']
+        }
+        emotion_type_map = {}
+        for t, words in emotion_words.items():
+            for w in words:
+                emotion_type_map[w] = t
+        if col in df.columns:
+            text = ' '.join(df[col].dropna().astype(str))
+            if text.strip():
+                okt = Okt()
+                words = [word for word in okt.morphs(text) if word not in stopwords]
+                emotion_filtered = [w for w in words if w in emotion_type_map]
+                freq = pd.Series(emotion_filtered).value_counts()
+                table = []
+                for word, count in freq.items():
+                    table.append([emotion_type_map[word], word, count])
+                df_table = pd.DataFrame(table, columns=['유형', '감정단어', '빈도'])
+                df_table = df_table.sort_values(['유형', '빈도'], ascending=[True, False])
+                st.dataframe(df_table)
+                category_sum = df_table.groupby('유형')['빈도'].sum().reindex(['긍정', '부정', '중립'])
+                fig = px.bar(
+                    x=category_sum.index,
+                    y=category_sum.values,
+                    labels={'x': '감정 유형', 'y': '단어 빈도 합계'},
+                    text=category_sum.values,
+                    color=category_sum.index,
+                    color_discrete_map={'긍정': 'royalblue', '부정': 'tomato', '중립': 'gray'},
+                    title='감정 유형별 단어 빈도'
+                )
+                fig.update_traces(textposition='outside')
+                fig.update_layout(
+                    xaxis=dict(tickfont=dict(size=13)),
+                    yaxis=dict(tickfont=dict(size=13)),
+                    title_font_size=20,
+                    showlegend=False
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("주관식 응답이 없습니다.")
+        else:
+            st.warning("reason_for_company_brand_image_opinion 컬럼이 없습니다.")
     # 27. 타 플랫폼과 비교한 성인 연령 제한 작품 수위 (막대그래프)
     elif q_num == 27:
         col = 'comparison_of_age_restricted_content_level'
@@ -671,8 +788,7 @@ for q_num in range(1, 31):
             x=labels,
             y=counts.values,
             text=bar_text,
-            labels={'x': '수위 평가', 'y': '응답 수'},
-            title=question_titles[27]
+            labels={'x': '수위 평가', 'y': '응답 수'}
         )
         fig.update_traces(textposition='outside', marker_color='slategray')
         st.plotly_chart(fig, use_container_width=True)
@@ -685,8 +801,7 @@ for q_num in range(1, 31):
         fig = px.pie(
             issue_df,
             names='issues_with_age_restricted_content',
-            values='count',
-            title=question_titles[28]
+            values='count'
         )
         st.plotly_chart(fig, use_container_width=True)
 
@@ -717,8 +832,34 @@ for q_num in range(1, 31):
             x=labels,
             y=counts.values,
             text=bar_text,
-            labels={'x': '만족도', 'y': '응답 수'},
-            title=question_titles[30]
+            labels={'x': '만족도', 'y': '응답 수'}
         )
         fig.update_traces(textposition='outside', marker_color='seagreen')
+        st.plotly_chart(fig, use_container_width=True)
+
+        
+    # 31. 성인 연령 제한 작품 노출 증가 시 이용 빈도 변화 예상 (막대그래프)
+    elif q_num == 31:
+        col = 'likelihood_of_increased_viewing'
+        label_map = {
+            1: '전혀 그렇지 않다',
+            2: '별로 그렇지 않다',
+            3: '보통이다',
+            4: '어느 정도 그렇다',
+            5: '매우 그렇다'
+        }
+        order = [1, 2, 3, 4, 5]
+        # 값이 문자열로 저장된 경우 숫자로 변환
+        counts = pd.to_numeric(df[col], errors='coerce').value_counts().reindex(order, fill_value=0)
+        percents = (counts / counts.sum() * 100).round(1)
+        labels = [label_map[i] for i in order]
+        bar_text = [f"{v} ({p}%)" for v, p in zip(counts.values, percents)]
+        fig = px.bar(
+            x=labels,
+            y=counts.values,
+            text=bar_text,
+            labels={'x': '이용 증가 예상', 'y': '응답 수'}
+        )
+        fig.update_traces(textposition='outside', marker_color='royalblue')
+        fig.update_layout(title_text="")  # 그래프 제목 제거
         st.plotly_chart(fig, use_container_width=True)
