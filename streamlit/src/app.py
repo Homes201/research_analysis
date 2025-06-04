@@ -612,11 +612,11 @@ for q_num in list(range(1, 12)) + [111] + list(range(12, 32)):
     elif q_num == 24:
         col = 'opinion_on_content_for_various_ages'
         label_map = {
-            1: '전혀 바람직하지 않다',
-            2: '별로 바람직하지 않다',
-            3: '보통이다',
-            4: '어느 정도 바람직하다',
-            5: '매우 바람직하다'
+            1: '매우 불만족',
+            2: '불만족',
+            3: '보통',
+            4: '만족',
+            5: '매우 만족'
         }
         order = [1, 2, 3, 4, 5]
         labels = [label_map[i] for i in order]
