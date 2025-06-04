@@ -20,6 +20,7 @@ uploaded_file = st.file_uploader("엑셀 파일을 업로드하세요", type=["x
 if uploaded_file:
     content = uploaded_file.read()  # 바이너리 읽기
     df = get_data(content)          # 캐시에 저장 가능
+    df = load_and_preprocess(df) # 데이터 전처리 함수 호출
 
 
 st.title("네이버 웹툰 브랜드 인식 변화 설문 분석")
