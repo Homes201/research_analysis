@@ -5,16 +5,22 @@ import re
 from utils import load_and_preprocess
 from konlpy.tag import Okt
 import plotly.express as px
+from io import BytesIO
 
 
 st.set_page_config(page_title="네이버 웹툰 브랜드 인식 분석", layout="wide")
 
-@st.cache_data
-def get_data():
-    file_name = r'.\19+ 웹툰 서비스에 대한 브랜드 인식 변화 조사 설문(응답)_변경.xlsx'
-    return load_and_preprocess(file_name)
 
-df = get_data()
+@st.cache_data
+def get_data(file_bytes):
+    return pd.read_excel(BytesIO(file_bytes))
+
+uploaded_file = st.file_uploader("엑셀 파일을 업로드하세요", type=["xlsx", "xls"])
+
+if uploaded_file:
+    content = uploaded_file.read()  # 바이너리 읽기
+    df = get_data(content)          # 캐시에 저장 가능
+
 
 st.title("네이버 웹툰 브랜드 인식 변화 설문 분석")
 st.markdown("#### 문항을 선택하면 해당 위치로 이동합니다.")
