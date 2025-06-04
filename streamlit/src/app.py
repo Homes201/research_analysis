@@ -636,11 +636,11 @@ for q_num in list(range(1, 12)) + [111] + list(range(12, 32)):
     elif q_num == 25:
         col = 'impact_on_brand_image'
         label_map = {
-            1: '매우 부정적 영향',
-            2: '다소 부정적 영향',
-            3: '영향 없음(무관함)',
-            4: '다소 긍정적 영향',
-            5: '매우 긍정적 영향'
+            1: '매우 그렇지 않다',
+            2: '그렇지 않다',
+            3: '보통이다',
+            4: '그렇다',
+            5: '매우 그렇다'
         }
         order = [1, 2, 3, 4, 5]
         labels = [label_map[i] for i in order]
