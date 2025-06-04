@@ -1,8 +1,8 @@
 import pandas as pd
 import re
 
-def load_and_preprocess(file_name):
-    # df = pd.read_excel(file_name) # 엑셀 파일을 읽어올 때 주석 처리
+def load_and_preprocess(df): #file_name(로컬 환경) -> df 변경
+    # df = pd.read_excel(file_name) # 엑셀 파일을 읽어올 때 주석 처리(로컬 환경)
     df.columns = df.columns.str.strip()
 
     # 타임스탬프 컬럼명 및 이용자 동의 컬럼 삭제
