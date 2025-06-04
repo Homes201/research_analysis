@@ -108,7 +108,8 @@ if "q" in query_params:
 
 # 모든 문항 결과를 한 페이지에 순서대로 출력
 
-for q_num in list(range(1, 12)) + [111] + list(range(12, 25)) + [25, 251, 26, 261] + list(range(27, 32)):
+# for q_num in list(range(1, 12)) + [111] + list(range(12, 25)) + [25, 251, 26, 261] + list(range(27, 32)):  #자연어 배포 안되는 이슈로 주석 처리
+for q_num in list(range(1, 12)) + [111] + list(range(12, 32)):    
     anchor(q_num)
     st.subheader(question_titles[q_num])
     # 아래에 기존 각 문항별 시각화 코드를 if q_num == ...: 대신 for문 안에 넣으세요.
