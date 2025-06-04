@@ -656,54 +656,54 @@ for q_num in list(range(1, 12)) + [111] + list(range(12, 32)):
         fig.update_traces(textposition='outside', marker_color='darkorange')
         st.plotly_chart(fig, use_container_width=True)
 
-    # 25-1. (주관식) 왜 그렇게 느끼셨는지 자유롭게 작성해주실 수 있을까요? (감정 유형별 단어 빈도)
-    elif q_num == 251:
-        col = 'reason_for_brand_image_opinion'
-        stopwords = {'오히려', '것', '더', '웹툰', '작품이', '네이버', "때문", '영화화', '영화계', '만화가', '만화', '문화생활', '영화', '이', '에','생각','.','을','적','의',',','와'}
-        emotion_words = {
-            '긍정': ['좋다', '행복', '괜찮', '완벽', '긍정', '필요', '재밌', '즐기', '공감', '존중', '개방', '만족', '고급', '완성도', '쾌적', '흥미', '집중', '변화', '트랜드', '다양성', '맞춤형', '필요하다'],
-            '부정': ['아쉽', '문제', '별로', '타격', '부정', '싫', '불편', '과하다', '덜하다', 'B급', '노출', '선정적', '지나치', '독', '불만', '불쾌', '아니다', '없다'],
-            '중립': ['없다', '모르', '모름', '없음', '별다르', '없을', '없다고', '없음']
-        }
-        emotion_type_map = {}
-        for t, words in emotion_words.items():
-            for w in words:
-                emotion_type_map[w] = t
-        if col in df.columns:
-            text = ' '.join(df[col].dropna().astype(str))
-            if text.strip():
-                okt = Okt()
-                words = [word for word in okt.morphs(text) if word not in stopwords]
-                emotion_filtered = [w for w in words if w in emotion_type_map]
-                freq = pd.Series(emotion_filtered).value_counts()
-                table = []
-                for word, count in freq.items():
-                    table.append([emotion_type_map[word], word, count])
-                df_table = pd.DataFrame(table, columns=['유형', '감정단어', '빈도'])
-                df_table = df_table.sort_values(['유형', '빈도'], ascending=[True, False])
-                st.dataframe(df_table)
-                category_sum = df_table.groupby('유형')['빈도'].sum().reindex(['긍정', '부정', '중립'])
-                fig = px.bar(
-                    x=category_sum.index,
-                    y=category_sum.values,
-                    labels={'x': '감정 유형', 'y': '단어 빈도 합계'},
-                    text=category_sum.values,
-                    color=category_sum.index,
-                    color_discrete_map={'긍정': 'royalblue', '부정': 'tomato', '중립': 'gray'},
-                    title='감정 유형별 단어 빈도'
-                )
-                fig.update_traces(textposition='outside')
-                fig.update_layout(
-                    xaxis=dict(tickfont=dict(size=13)),
-                    yaxis=dict(tickfont=dict(size=13)),
-                    title_font_size=20,
-                    showlegend=False
-                )
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.info("주관식 응답이 없습니다.")
-        else:
-            st.warning("reason_for_brand_image_opinion 컬럼이 없습니다.")
+    # # 25-1. (주관식) 왜 그렇게 느끼셨는지 자유롭게 작성해주실 수 있을까요? (감정 유형별 단어 빈도)
+    # elif q_num == 251:
+    #     col = 'reason_for_brand_image_opinion'
+    #     stopwords = {'오히려', '것', '더', '웹툰', '작품이', '네이버', "때문", '영화화', '영화계', '만화가', '만화', '문화생활', '영화', '이', '에','생각','.','을','적','의',',','와'}
+    #     emotion_words = {
+    #         '긍정': ['좋다', '행복', '괜찮', '완벽', '긍정', '필요', '재밌', '즐기', '공감', '존중', '개방', '만족', '고급', '완성도', '쾌적', '흥미', '집중', '변화', '트랜드', '다양성', '맞춤형', '필요하다'],
+    #         '부정': ['아쉽', '문제', '별로', '타격', '부정', '싫', '불편', '과하다', '덜하다', 'B급', '노출', '선정적', '지나치', '독', '불만', '불쾌', '아니다', '없다'],
+    #         '중립': ['없다', '모르', '모름', '없음', '별다르', '없을', '없다고', '없음']
+    #     }
+    #     emotion_type_map = {}
+    #     for t, words in emotion_words.items():
+    #         for w in words:
+    #             emotion_type_map[w] = t
+    #     if col in df.columns:
+    #         text = ' '.join(df[col].dropna().astype(str))
+    #         if text.strip():
+    #             okt = Okt()
+    #             words = [word for word in okt.morphs(text) if word not in stopwords]
+    #             emotion_filtered = [w for w in words if w in emotion_type_map]
+    #             freq = pd.Series(emotion_filtered).value_counts()
+    #             table = []
+    #             for word, count in freq.items():
+    #                 table.append([emotion_type_map[word], word, count])
+    #             df_table = pd.DataFrame(table, columns=['유형', '감정단어', '빈도'])
+    #             df_table = df_table.sort_values(['유형', '빈도'], ascending=[True, False])
+    #             st.dataframe(df_table)
+    #             category_sum = df_table.groupby('유형')['빈도'].sum().reindex(['긍정', '부정', '중립'])
+    #             fig = px.bar(
+    #                 x=category_sum.index,
+    #                 y=category_sum.values,
+    #                 labels={'x': '감정 유형', 'y': '단어 빈도 합계'},
+    #                 text=category_sum.values,
+    #                 color=category_sum.index,
+    #                 color_discrete_map={'긍정': 'royalblue', '부정': 'tomato', '중립': 'gray'},
+    #                 title='감정 유형별 단어 빈도'
+    #             )
+    #             fig.update_traces(textposition='outside')
+    #             fig.update_layout(
+    #                 xaxis=dict(tickfont=dict(size=13)),
+    #                 yaxis=dict(tickfont=dict(size=13)),
+    #                 title_font_size=20,
+    #                 showlegend=False
+    #             )
+    #             st.plotly_chart(fig, use_container_width=True)
+    #         else:
+    #             st.info("주관식 응답이 없습니다.")
+    #     else:
+    #         st.warning("reason_for_brand_image_opinion 컬럼이 없습니다.")
 
    
     # 26. 기업 브랜드 이미지 영향 (막대그래프)
@@ -730,54 +730,54 @@ for q_num in list(range(1, 12)) + [111] + list(range(12, 32)):
         fig.update_traces(textposition='outside', marker_color='darkgreen')
         st.plotly_chart(fig, use_container_width=True)
 
- # 26-1. (주관식) 가장 큰 영향을 주었다고 느끼신 측면이나 요인 (감정 유형별 단어 빈도)
-    elif q_num == 261:
-        col = 'reason_for_company_brand_image_opinion'
-        stopwords = {'오히려', '것', '더', '웹툰', '작품이', '네이버', "때문", '영화화', '영화계', '만화가', '만화', '문화생활', '영화', '이', '에','생각','.','을','적','의',',','와'}
-        emotion_words = {
-            '긍정': ['좋다', '행복', '괜찮', '완벽', '긍정', '필요', '재밌', '즐기', '공감', '존중', '개방', '만족', '고급', '완성도', '쾌적', '흥미', '집중', '변화', '트랜드', '다양성', '맞춤형', '필요하다'],
-            '부정': ['아쉽', '문제', '별로', '타격', '부정', '싫', '불편', '과하다', '덜하다', 'B급', '노출', '선정적', '지나치', '독', '불만', '불쾌', '아니다', '없다'],
-            '중립': ['없다', '모르', '모름', '없음', '별다르', '없을', '없다고', '없음']
-        }
-        emotion_type_map = {}
-        for t, words in emotion_words.items():
-            for w in words:
-                emotion_type_map[w] = t
-        if col in df.columns:
-            text = ' '.join(df[col].dropna().astype(str))
-            if text.strip():
-                okt = Okt()
-                words = [word for word in okt.morphs(text) if word not in stopwords]
-                emotion_filtered = [w for w in words if w in emotion_type_map]
-                freq = pd.Series(emotion_filtered).value_counts()
-                table = []
-                for word, count in freq.items():
-                    table.append([emotion_type_map[word], word, count])
-                df_table = pd.DataFrame(table, columns=['유형', '감정단어', '빈도'])
-                df_table = df_table.sort_values(['유형', '빈도'], ascending=[True, False])
-                st.dataframe(df_table)
-                category_sum = df_table.groupby('유형')['빈도'].sum().reindex(['긍정', '부정', '중립'])
-                fig = px.bar(
-                    x=category_sum.index,
-                    y=category_sum.values,
-                    labels={'x': '감정 유형', 'y': '단어 빈도 합계'},
-                    text=category_sum.values,
-                    color=category_sum.index,
-                    color_discrete_map={'긍정': 'royalblue', '부정': 'tomato', '중립': 'gray'},
-                    title='감정 유형별 단어 빈도'
-                )
-                fig.update_traces(textposition='outside')
-                fig.update_layout(
-                    xaxis=dict(tickfont=dict(size=13)),
-                    yaxis=dict(tickfont=dict(size=13)),
-                    title_font_size=20,
-                    showlegend=False
-                )
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.info("주관식 응답이 없습니다.")
-        else:
-            st.warning("reason_for_company_brand_image_opinion 컬럼이 없습니다.")
+#  # 26-1. (주관식) 가장 큰 영향을 주었다고 느끼신 측면이나 요인 (감정 유형별 단어 빈도)
+#     elif q_num == 261:
+#         col = 'reason_for_company_brand_image_opinion'
+#         stopwords = {'오히려', '것', '더', '웹툰', '작품이', '네이버', "때문", '영화화', '영화계', '만화가', '만화', '문화생활', '영화', '이', '에','생각','.','을','적','의',',','와'}
+#         emotion_words = {
+#             '긍정': ['좋다', '행복', '괜찮', '완벽', '긍정', '필요', '재밌', '즐기', '공감', '존중', '개방', '만족', '고급', '완성도', '쾌적', '흥미', '집중', '변화', '트랜드', '다양성', '맞춤형', '필요하다'],
+#             '부정': ['아쉽', '문제', '별로', '타격', '부정', '싫', '불편', '과하다', '덜하다', 'B급', '노출', '선정적', '지나치', '독', '불만', '불쾌', '아니다', '없다'],
+#             '중립': ['없다', '모르', '모름', '없음', '별다르', '없을', '없다고', '없음']
+#         }
+#         emotion_type_map = {}
+#         for t, words in emotion_words.items():
+#             for w in words:
+#                 emotion_type_map[w] = t
+#         if col in df.columns:
+#             text = ' '.join(df[col].dropna().astype(str))
+#             if text.strip():
+#                 okt = Okt()
+#                 words = [word for word in okt.morphs(text) if word not in stopwords]
+#                 emotion_filtered = [w for w in words if w in emotion_type_map]
+#                 freq = pd.Series(emotion_filtered).value_counts()
+#                 table = []
+#                 for word, count in freq.items():
+#                     table.append([emotion_type_map[word], word, count])
+#                 df_table = pd.DataFrame(table, columns=['유형', '감정단어', '빈도'])
+#                 df_table = df_table.sort_values(['유형', '빈도'], ascending=[True, False])
+#                 st.dataframe(df_table)
+#                 category_sum = df_table.groupby('유형')['빈도'].sum().reindex(['긍정', '부정', '중립'])
+#                 fig = px.bar(
+#                     x=category_sum.index,
+#                     y=category_sum.values,
+#                     labels={'x': '감정 유형', 'y': '단어 빈도 합계'},
+#                     text=category_sum.values,
+#                     color=category_sum.index,
+#                     color_discrete_map={'긍정': 'royalblue', '부정': 'tomato', '중립': 'gray'},
+#                     title='감정 유형별 단어 빈도'
+#                 )
+#                 fig.update_traces(textposition='outside')
+#                 fig.update_layout(
+#                     xaxis=dict(tickfont=dict(size=13)),
+#                     yaxis=dict(tickfont=dict(size=13)),
+#                     title_font_size=20,
+#                     showlegend=False
+#                 )
+#                 st.plotly_chart(fig, use_container_width=True)
+#             else:
+#                 st.info("주관식 응답이 없습니다.")
+#         else:
+#             st.warning("reason_for_company_brand_image_opinion 컬럼이 없습니다.")
     # 27. 타 플랫폼과 비교한 성인 연령 제한 작품 수위 (막대그래프)
     elif q_num == 27:
         col = 'comparison_of_age_restricted_content_level'
