@@ -721,11 +721,19 @@ for q_num in list(range(1, 12)) + [111] + list(range(12, 32)):
         counts = df[col].value_counts().reindex(order, fill_value=0)
         percents = (counts / counts.sum() * 100).round(1)
         bar_text = [f"{v} ({p}%)" for v, p in zip(counts.values, percents)]
+
+       # 데이터프레임으로 명시적으로 구성 
+        bar_df = pd.DataFrame({
+            '영향': labels,
+            '응답 수': counts.values,
+            'text': bar_text
+        })
+
         fig = px.bar(
-            x=labels,
-            y=counts.values,
-            text=bar_text,
-            labels={'x': '영향', 'y': '응답 수'}
+            bar_df,
+            x='영향',
+            y='응답 수',
+            text='text',
         )
         fig.update_traces(textposition='outside', marker_color='darkgreen')
         st.plotly_chart(fig, use_container_width=True)
